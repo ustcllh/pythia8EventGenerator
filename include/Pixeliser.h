@@ -192,6 +192,9 @@ void pixeliser<T>::set_maximum(float zmax){
 // plot image
 template <typename T>
 void pixeliser<T>::plot(std::string out_dir, std::string prefix){
+  if(out_dir.back() != '/')
+    out_dir+="/";
+
   std::string ofn = out_dir + prefix + ".pdf";
 
   std::vector<TH2F*> hv;
@@ -213,6 +216,7 @@ void pixeliser<T>::plot(std::string out_dir, std::string prefix){
 
   int nv = (int) std::sqrt(_channel);
   int nh = (int) (_channel/nv);
+  if(nv*nh<_channel) nh+=1;
 
 
   int npx = nv * 400;
@@ -242,6 +246,9 @@ void pixeliser<T>::plot(std::string out_dir, std::string prefix){
 // save csv file
 template <typename T>
 void pixeliser<T>::save(std::string out_dir, std::string prefix){
+  if(out_dir.back() != '/')
+    out_dir+="/";
+
   std::string ofn = out_dir + prefix + ".csv";
   std::ofstream ofs(ofn, std::ofstream::out);
 

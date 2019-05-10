@@ -68,6 +68,8 @@ pythiaEvent::pythiaEvent(double pthat = 120., double rapMin = -3., double rapMax
 
   // tunes disabled
   //pythia.readString(Form("Tune:pp = %d",tune_));
+
+  // set random seed
   pythia.readString("Random:setSeed = on");
   pythia.readString("Random:seed = 0");
   if(_partonLevel) {
@@ -95,15 +97,21 @@ void pythiaEvent::next() {
       // extra info disabled
       //p.set_user_info(new extraInfo(pythia.event[i].id(), 0));
 
-      if(p.rap()>_rapMin && p.rap()<_rapMax)
+      if(p.rap()>_rapMin && p.rap()<_rapMax){
+        auto pid = particle.id();
+        p.set_user_info(new MyInfo(pid));
         _particles.push_back(p);
+
+      }
     }
     // select outgoing parton from HardQCD process
     else if(particle.status()==-23){
       fastjet::PseudoJet p( particle.px(), particle.py(), particle.pz(), particle.e());
-      auto pid = particle.id();
-      p.set_user_info(new MyInfo(pid));
-      _initiators.push_back(p);
+        if(p.rap()>_rapMin && p.rap()<_rapMax){
+        auto pid = particle.id();
+        p.set_user_info(new MyInfo(pid));
+        _initiators.push_back(p);
+      }
     }
   }
 }
