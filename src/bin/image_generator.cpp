@@ -16,7 +16,7 @@ int main(int argc, char* argv[]){
 
   // configuration
   double pthat = 150.;
-  int nEvents = 100;
+  int nEvents = 60000;
 
   // output
   std::string outdir = argv[1];
@@ -27,10 +27,6 @@ int main(int argc, char* argv[]){
   double ptmin = 160.;
   fastjet::JetDefinition jet_def(fastjet::antikt_algorithm, R);
 
-  // jets container
-  std::vector<fastjet::PseudoJet> qjets;
-  std::vector<fastjet::PseudoJet> gjets;
-
   // pthat, rapmin, rapmax, partonlevel
   pythiaEvent pythia(pthat, -3, 3, false);
 
@@ -38,21 +34,23 @@ int main(int argc, char* argv[]){
   int njet = 0;
 
   for(int i=0; i<nEvents; i++){
-    qjets.clear();
-    gjets.clear();
     pythia.next();
 
     std::vector<fastjet::PseudoJet> particles = pythia.particles();
-    std::vector<fastjet::PseudoJet> initiators = pythia.initiators();
 
     // inclusive jets
     fastjet::ClusterSequence cs(particles, jet_def);
     std::vector<fastjet::PseudoJet> jets = cs.inclusive_jets(ptmin);
-
-    for(auto&& it=jets.begin(); it!=jets.end(); it++){
-      if(!(it->has_structure())) jets.erase(it);
+/*
+    for(auto it=jets.begin(); it!=jets.end(); ){
+      if(!(it->has_structure())) {
+        it = jets.erase(it);
+      }
+      else {
+        it++;
+      }
     }
-
+*/
     // generate image
     for(auto&& jet: jets){
       pixeliser<float> p (5, 33, 33);
@@ -72,12 +70,16 @@ int main(int argc, char* argv[]){
         p.fill(4, 0.4, deta, dphi, std::abs(particle.pz()));
       } // loop over particles
       p.set_maximum(max);
-      p.plot(outdir, prefix + std::to_string(njet));
+      // p.plot(outdir, prefix + std::to_string(njet));
       // p.print();
       p.save(outdir, prefix + std::to_string(njet));
 
       njet++;
     } // loop over  jets
+
+    if((i+1) % 100 == 0) {
+      std::cout<< "Events Done: " << i+1 << std::endl;
+    }
 
   } // loop over events
 

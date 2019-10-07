@@ -1,11 +1,11 @@
 // pythia event generator
 // Author: Lihan Liu
 //
-// vertex column changed to .pu14 format
+// vertex column changed
 // *--------------------------------------*
-// | .pu14m format                        |
+// | .pu14 format (modified)              |
 // | # event 0                            |
-// | pt rap phi m pid (vertex->init)      |
+// | px py pz m pid (vertex->init)        |
 // | end                                  |
 // | #event 1                             |
 // | ...                                  |
@@ -35,7 +35,7 @@ int main(int argc, char* argv[]){
 
   // configuration
   double pthat = 120.;
-  int nEvents = 10;
+  int nEvents = 10000;
 
   // output
   std::string outdir = argv[1];
@@ -45,7 +45,7 @@ int main(int argc, char* argv[]){
     outdir.pop_back();
   }
 
-  std::string ofn = outdir + "/pythia_" + std::to_string((int) pthat) + "_" + std::to_string(nbatch) + ".pu14m";
+  std::string ofn = outdir + "/pythia_" + std::to_string((int) pthat) + "_" + std::to_string(nbatch) + ".pu14";
   std::ofstream ofs(ofn, std::ofstream::out);
 
   // pthat, rapmin, rapmax, partonlevel
@@ -59,27 +59,19 @@ int main(int argc, char* argv[]){
     ofs << "# event " << i << std::endl;
     // initiators
     for(auto&& p : initiators){
-      float pt = (float) std::sqrt(std::pow(p.px(), 2) + std::pow(p.py(), 2));
-      float rap = (float) p.rap();
-      float phi = (float) p.phi();
-      float m = (float) p.m();
       int pid = p.user_info<MyInfo>().pdg_id();
       int init = 1;
 
-      ofs << std::fixed << pt << " " << rap << " " << phi << " " << m << " ";
+      ofs << std::fixed << p.px() << " " << p.py() << " " << p.pz() << " " << p.m() << " ";
       ofs << pid << " " << init << "" << std::endl;
     }
 
     // final state particles
     for(auto&& p : particles){
-      float pt = (float) std::sqrt(std::pow(p.px(), 2) + std::pow(p.py(), 2));
-      float rap = (float) p.rap();
-      float phi = (float) p.phi();
-      float m = (float) p.m();
       int pid = p.user_info<MyInfo>().pdg_id();
       int init = 0;
 
-      ofs << std::fixed << pt << " " << rap << " " << phi << " " << m << " ";
+      ofs << std::fixed << p.px() << " " << p.py() << " " << p.pz() << " " << p.m() << " ";
       ofs << pid << " " << init << "" << std::endl;
     }
     ofs << "end " << std::endl;

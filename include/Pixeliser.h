@@ -136,7 +136,7 @@ int pixeliser<T>::_get_index(float R, float dr, int width){
 template <typename T>
 int pixeliser<T>::_index(int ix, int iy){
   if(ix>=_width || iy >= _height){
-    std::cout << "Class Pixeliser: index out of range" << std::endl;
+    //std::cout << "Class Pixeliser: index out of range" << std::endl;
     return -1;
   }
   return (_height-iy-1)*_width + ix;

@@ -10,7 +10,7 @@
 #include "TH1.h"
 #include "TCanvas.h"
 #include "TLegend.h"
-#include "Tstyle.h"
+#include "TStyle.h"
 
 int main(int argc, char* argv[]){
 
