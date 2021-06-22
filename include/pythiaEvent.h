@@ -29,6 +29,7 @@ private :
   double _rapMin;
   double _rapMax;
   bool   _partonLevel;
+  float _weight;
 
   // vector of final state particles
   std::vector<fastjet::PseudoJet> _particles;
@@ -37,19 +38,19 @@ private :
 
 public :
 
-  pythiaEvent(double pthat, double rapMin, double rapMax, bool partonLevel);
+  pythiaEvent(double pthat, double rapMin, double rapMax, bool partonLevel, int seed);
   ~pythiaEvent();
   void next();
   std::vector<fastjet::PseudoJet> particles();
   std::vector<fastjet::PseudoJet> initiators();
+  float weight();
 
 
 };
 
-// tunes disabled
 // pythiaEvent(double pthat = 120., unsigned int tune = 14, double rapMin = -3., double rapMax = 3., bool partonLevel = false) : pthat_(pthat), tune_(tune), rapMin_(rapMin), rapMax_(rapMax), partonLevel_(partonLevel)
 
-pythiaEvent::pythiaEvent(double pthat = 120., double rapMin = -3., double rapMax = 3., bool partonLevel = false) : _pthat(pthat), _rapMin(rapMin), _rapMax(rapMax), _partonLevel(partonLevel)
+pythiaEvent::pythiaEvent(double pthat = 120., double rapMin = -3., double rapMax = 3., bool partonLevel = false, int seed = 0) : _pthat(pthat), _rapMin(rapMin), _rapMax(rapMax), _partonLevel(partonLevel)
 {
 
   // Generator. LHC process and output selection. Initialization.
@@ -66,15 +67,23 @@ pythiaEvent::pythiaEvent(double pthat = 120., double rapMin = -3., double rapMax
   pythia.readString("Next:numberShowProcess = 0");
   pythia.readString("Next:numberShowEvent = 0");
 
-  // tunes disabled
-  //pythia.readString(Form("Tune:pp = %d",tune_));
+
+  // tunes enabled
+	// default 14
+  pythia.readString("Tune:pp = 14");
 
   // set random seed
   pythia.readString("Random:setSeed = on");
-  pythia.readString("Random:seed = 0");
+  pythia.readString("Random:seed = " + std::to_string(seed));
   if(_partonLevel) {
     pythia.readString("HadronLevel:all = off");
   }
+
+  // flat pt hat
+  pythia.readString("PhaseSpace:bias2Selection = on");
+  pythia.readString("PhaseSpace:bias2SelectionPow = 4");
+  pythia.readString("PhaseSpace:bias2SelectionRef = 100.");
+
   _particles.clear();
   _initiators.clear();
   pythia.init();
@@ -87,6 +96,7 @@ void pythiaEvent::next() {
   _particles.clear();
   _initiators.clear();
   pythia.next();
+  _weight = pythia.info.weight();
 
   // loop over particles
   for (int i = 0; i < pythia.event.size(); ++i) {
@@ -124,4 +134,7 @@ std::vector<fastjet::PseudoJet> pythiaEvent::initiators(){
   return _initiators;
 }
 
+float pythiaEvent::weight(){
+  return _weight;
+}
 #endif //__PYTHIAEVENT_H__

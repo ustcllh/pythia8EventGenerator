@@ -12,7 +12,7 @@
 // *--------------------------------------*
 //
 // note:
-// initiators             -> init = 1
+// initiators             -> init = -1
 // final state particles  -> init = 0
 
 #include <vector>
@@ -34,7 +34,7 @@ int main(int argc, char* argv[]){
   }
 
   // configuration
-  double pthat = 120.;
+  double pthat = 100.;
   int nEvents = 10000;
 
   // output
@@ -45,26 +45,30 @@ int main(int argc, char* argv[]){
     outdir.pop_back();
   }
 
-  std::string ofn = outdir + "/pythia_" + std::to_string((int) pthat) + "_" + std::to_string(nbatch) + ".pu14";
+  std::string ofn = outdir + "/pythia" + std::to_string((int) pthat) + "_" + std::to_string(nbatch) + ".pu14";
   std::ofstream ofs(ofn, std::ofstream::out);
 
   // pthat, rapmin, rapmax, partonlevel
-  pythiaEvent pythia(pthat, -3, 3, false);
+  pythiaEvent pythia(pthat, -3, 3, false, nbatch);
   for(int i=0; i<nEvents; i++){
     pythia.next();
 
     std::vector<fastjet::PseudoJet> particles = pythia.particles();
     std::vector<fastjet::PseudoJet> initiators = pythia.initiators();
-
+    float weight = pythia.weight();
+    
     ofs << "# event " << i << std::endl;
+    ofs << "weight " << weight << std::endl; 
     // initiators
+    /*
     for(auto&& p : initiators){
       int pid = p.user_info<MyInfo>().pdg_id();
-      int init = 1;
+      int init = -1;
 
       ofs << std::fixed << p.px() << " " << p.py() << " " << p.pz() << " " << p.m() << " ";
       ofs << pid << " " << init << "" << std::endl;
     }
+    */
 
     // final state particles
     for(auto&& p : particles){
